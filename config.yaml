@@ -1,0 +1,92 @@
+# ─────────────────────────────────────────
+# Regime-Gated Gap Trading Bot Config
+# ─────────────────────────────────────────
+
+strategy:
+  # ── Layer 1: Regime Detection ──
+  regime:
+    vol_short_window: 5
+    vol_long_window: 20
+    vol_of_vol_window: 20
+    trend_vol_upper: 0.27
+    volatile_vol_upper: 0.45
+    vov_crash_threshold: 0.8
+    vov_trend_threshold: 0.3
+    sma_short: 20
+    sma_long: 60
+    hmm_enabled: true
+    hmm_states: 3
+    hmm_lookback_days: 90
+    hmm_retrain_interval: 14
+    hmm_weight: 0.3
+    min_regime_days: 2
+    lookback_days: 120
+
+    TREND:
+      allowed_strategies: ["gap_trading"]
+      position_size_multiplier: 1.0
+      atr_stop_multiplier: 2.0
+      max_exposure: 0.80
+
+    VOLATILE:
+      allowed_strategies: ["gap_trading"]
+      position_size_multiplier: 0.5
+      atr_stop_multiplier: 2.5
+      max_exposure: 0.50
+
+    CRASH:
+      allowed_strategies: []
+      position_size_multiplier: 0.0
+      atr_stop_multiplier: 0.0
+      max_exposure: 0.10
+      force_liquidate: true
+
+  # ── Layer 2: Gap Trading Engine ──
+  gap_trading:
+    us_return_threshold: 0.012      # 최소 1.2% US 수익률 → 매수 시그널 (최적화)
+    us_return_strong: 0.015         # 1.5% 이상 → 최대 강도
+    exit_mode: "next_close"         # intraday / next_close / swing
+    max_holding_days: 2             # swing 모드 최대 보유일
+
+    # 숏 시그널 (US 하락 시 매도)
+    short_enabled: false            # 공매도 비활성 (한국시장 제약)
+
+    pairs:
+      - name: "금리-금융"
+        lead: "JPM"
+        lag: ["086790", "105560"]
+
+      - name: "금융-산업"
+        lead: "BAC"
+        lag: ["028260"]
+
+      - name: "IT-포탈"
+        lead: "GS"
+        lag: ["035420"]
+
+      - name: "IT-반도체"
+        lead: "MSFT"
+        lag: ["000660"]
+
+      - name: "에너지-소재"
+        lead: "CVX"
+        lag: ["051910"]
+
+      - name: "원유-정유"
+        lead: "XOM"
+        lag: ["096770"]
+
+      - name: "반도체-리더"
+        lead: "AAPL"
+        lag: ["005930"]
+
+risk:
+  max_position_pct: 0.12
+  max_total_exposure: 0.80
+  atr_period: 14
+  atr_stop_multiplier: 2.0
+  max_daily_trades: 10
+  cooldown_after_loss: 30
+  max_consecutive_losses: 3
+  kelly_fraction: 0.25
+  min_position_size_krw: 100000
