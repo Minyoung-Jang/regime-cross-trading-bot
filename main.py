@@ -234,7 +234,10 @@ def main():
 
     # 시그널 핸들러
     signal.signal(signal.SIGINT, signal_handler)
-    signal.signal(signal.SIGTERM, signal_handler)
+    try:
+        signal.signal(signal.SIGTERM, signal_handler)  # 윈도우 미지원
+    except (OSError, AttributeError):
+        pass
 
     if args.backtest:
         run_backtest(config, args.start, args.end)

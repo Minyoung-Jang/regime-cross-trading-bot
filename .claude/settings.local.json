@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c:*)",
+      "Bash(pip install:*)",
+      "Bash(pip3:*)",
+      "Bash(python3:*)",
+      "Bash(source:*)",
+      "Bash(/Users/miny/Desktop/Development/stock/regime-cross-trading-bot/venv/bin/python:*)",
+      "Bash(/Users/miny/Desktop/Development/stock/regime-cross-trading-bot/venv/bin/pip install yfinance)",
+      "Bash(/Users/miny/Desktop/Development/stock/regime-cross-trading-bot/venv/bin/python3:*)",
+      "Bash(/Users/miny/Desktop/Development/stock/regime-cross-trading-bot/venv/bin/pip install:*)",
+      "Bash(ls:*)",
+      "Bash(wc:*)",
+      "Bash(python main.py:*)",
+      "Bash(venv/Scripts/pip install typing_extensions)",
+      "Bash(venv/Scripts/pip install tzdata)",
+      "Bash(venv/Scripts/python -c \":*)"
+    ]
+  }
+}

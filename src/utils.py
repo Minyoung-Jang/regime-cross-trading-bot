@@ -5,9 +5,13 @@ import logging
 import requests
 from datetime import datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
+
+KST = ZoneInfo("Asia/Seoul")
+ET = ZoneInfo("America/New_York")
 
 
 def setup_logger(name: str, level: str = "INFO") -> logging.Logger:
@@ -30,7 +34,7 @@ def setup_logger(name: str, level: str = "INFO") -> logging.Logger:
         log_dir = Path(__file__).resolve().parent.parent / "logs"
         log_dir.mkdir(exist_ok=True)
         fh = logging.FileHandler(
-            log_dir / f"bot_{datetime.now().strftime('%Y%m%d')}.log",
+            log_dir / f"bot_{datetime.now(KST).strftime('%Y%m%d')}.log",
             encoding="utf-8",
         )
         fh.setLevel(logging.DEBUG)
@@ -48,7 +52,7 @@ def send_telegram(token: str, chat_id: str, message: str):
         url = f"https://api.telegram.org/bot{token}/sendMessage"
         payload = {
             "chat_id": chat_id,
-            "text": f"[{datetime.now().strftime('%H:%M:%S')}] {message}",
+            "text": f"[{datetime.now(KST).strftime('%H:%M:%S')}] {message}",
         }
         requests.post(url, json=payload, timeout=5)
     except Exception:
@@ -104,21 +108,20 @@ def calc_volatility(prices: pd.Series, window: int = 20) -> pd.Series:
 
 def is_kr_market_open() -> bool:
     """한국 시장 개장 여부 확인 (09:00 ~ 15:30 KST)"""
-    now = datetime.now()
-    market_open = now.replace(hour=9, minute=0, second=0)
-    market_close = now.replace(hour=15, minute=30, second=0)
+    now = datetime.now(KST)
+    market_open = now.replace(hour=9, minute=0, second=0, microsecond=0)
+    market_close = now.replace(hour=15, minute=30, second=0, microsecond=0)
     weekday = now.weekday()
     return weekday < 5 and market_open <= now <= market_close
 
 
 def is_us_market_open() -> bool:
-    """미국 시장 개장 여부 확인 (23:30 ~ 06:00 KST, 서머타임 고려 X 단순 버전)"""
-    now = datetime.now()
-    hour = now.hour
+    """미국 시장 개장 여부 확인 (NYSE: 09:30 ~ 16:00 ET, 서머타임 자동 반영)"""
+    now = datetime.now(ET)
+    market_open = now.replace(hour=9, minute=30, second=0, microsecond=0)
+    market_close = now.replace(hour=16, minute=0, second=0, microsecond=0)
     weekday = now.weekday()
-    if weekday < 5:
-        return hour >= 23 or hour < 6
-    return False
+    return weekday < 5 and market_open <= now <= market_close
 
 
 def format_krw(amount: float) -> str:
